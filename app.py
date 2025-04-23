@@ -57,3 +57,4 @@ if job_file and resumes:
     st.code(email_content)
 
     st.download_button("📩 Download Email", email_content, file_name="shortlisted_email.txt")
+
