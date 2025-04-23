@@ -1,65 +1,59 @@
-import streamlit as st
+import streamlit as st 
 import json
-from llm_utils import extract_job_info
-from portfolios import init_portfolios
-from email_generator import generate_email
-
-
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from llm_utils import extract_job_info
+from email_generator import generate_email
+from portfolios import init_resume_collection
+from resume_utils import extract_text_from_resume
+import uuid
 
-load_dotenv()  # This will load the environment variables from .env file
+load_dotenv()
+st.set_page_config(page_title="Portfolio Shortlisting", layout="centered")
 
-# Then access your API key like this:
-groq_api_key = os.getenv("GROQ_API_KEY")
-
-import chromadb
-
-# Initialize Chroma client
-chroma_client = chromadb.Client()
-
-# Create or get the collection
-collection = chroma_client.get_or_create_collection(name="my_collection1")
-
-
-
-
-
-st.set_page_config(page_title="Portfolio Shortlisting with LLM", layout="centered")
-
-st.title("🧠 Portfolio Shortlisting using RAG + LLM")
+st.title("📂 Resume Shortlisting System")
 
 # Upload job description
 job_file = st.file_uploader("Upload Job Description", type=["txt", "pdf", "docx"])
 
-if job_file:
-    job_text = job_file.read().decode("utf-8", errors="ignore")
+# Upload multiple resumes
+resumes = st.file_uploader("Upload Resumes Folder", type=["pdf", "docx", "txt"], accept_multiple_files=True)
 
-    st.subheader("📄 Extracting Job Info...")
+# Number of best matches
+top_k = st.number_input("Select number of best matches", min_value=1, max_value=10, value=3, step=1)
+
+if job_file and resumes:
+    job_text = job_file.read().decode("utf-8", errors="ignore")
+    st.subheader("🔍 Extracting Job Info...")
     job_info_json = extract_job_info(job_text)
 
     try:
         job_info = json.loads(job_info_json.strip("`\n"))
         st.json(job_info)
     except Exception as e:
-        st.error("Failed to extract job details. Try again.")
+        st.error("❌ Failed to extract job info")
         st.stop()
 
     skills_query = " ".join(job_info["SKILLS"])
 
-    st.subheader("🔍 Matching Portfolios...")
-    collection = chroma_client.get_or_create_collection(name="my_collection1")
+    st.subheader("📁 Indexing Resumes...")
+    collection = init_resume_collection()
 
-    results = collection.query(query_texts=[skills_query], n_results=2)
-    top_portfolios = " ".join(results["documents"][0])
+    for resume in resumes:
+        text = extract_text_from_resume(resume)
+        uid = str(uuid.uuid4())
+        collection.add(documents=[text], ids=[uid])
 
-    st.success("✅ Shortlisted Candidates:")
-    for doc in results["documents"]:
-        st.write(doc)
+    st.subheader("🎯 Matching Resumes...")
+    results = collection.query(query_texts=[skills_query], n_results=top_k)
+
+    top_resumes = "\n\n".join(["\n".join(doc) for doc in results["documents"]])
+    st.success("✅ Top Matching Resumes:")
+    for i, doc in enumerate(results["documents"], start=1):
+        st.markdown(f"**Candidate {i}:**\n\n{doc[0]}")
 
     st.subheader("📧 Generating Email...")
-    email_content = generate_email(top_portfolios)
+    email_content = generate_email(top_resumes)
     st.code(email_content)
 
-    st.download_button("📥 Download Email", email_content, file_name="shortlist_email.txt")
-
+    st.download_button("📩 Download Email", email_content, file_name="shortlisted_email.txt")
