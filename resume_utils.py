@@ -16,5 +16,6 @@ def extract_text_from_resume(file):
         text = file.read().decode("utf-8", errors="ignore")
     else:
         text = "Unsupported file format."
+        
     
     return text
