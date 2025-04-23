@@ -9,3 +9,4 @@ def generate_email(portfolios_text):
     email_chain = email_prompt | llm
     result = email_chain.invoke({"input": portfolios_text})
     return result.content
+
