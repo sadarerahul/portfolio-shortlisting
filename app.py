@@ -47,10 +47,20 @@ if job_file and resumes:
     st.subheader("🎯 Matching Resumes...")
     results = collection.query(query_texts=[skills_query], n_results=top_k)
 
-    top_resumes = "\n\n".join(["\n".join(doc) for doc in results["documents"]])
-    st.success("✅ Top Matching Resumes:")
+    top_resumes = ""
+    st.success("✅ Top Matching Candidate Names:")
     for i, doc in enumerate(results["documents"], start=1):
-        st.markdown(f"**Candidate {i}:**\n\n{doc[0]}")
+        full_text = doc[0]
+        lines = full_text.strip().splitlines()
+        name = next((line for line in lines if line.strip()), "Unnamed Candidate")
+        top_resumes += f"Candidate {i}: {name}\n"
+        st.markdown(f"**Candidate {i}:** {name}")
+
+
+    # top_resumes = "\n\n".join(["\n".join(doc) for doc in results["documents"]])
+    # st.success("✅ Top Matching Resumes:")
+    # for i, doc in enumerate(results["documents"], start=1):
+    #     st.markdown(f"**Candidate {i}:**\n\n{doc[0]}")
 
     st.subheader("📧 Generating Email...")
     email_content = generate_email(top_resumes)
