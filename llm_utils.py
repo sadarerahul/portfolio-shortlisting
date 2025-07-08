@@ -26,5 +26,7 @@ def extract_job_info(job_text):
         ("human", "{input}")
     ])
     chain = prompt | llm
+    if len(job_text) > 3000:
+        job_text = job_text[:3000]
     result = chain.invoke({"input": job_text})
     return result.content
