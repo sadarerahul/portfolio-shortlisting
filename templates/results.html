@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results - AI Resume Shortlisting</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="navbar">
+    <a class="navbar-brand" href="/">HireGenix</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/main">Shortlist</a>
+    </div>
+  </div>
+
+  <div class="result-container">
+    <h1>✅ Shortlisting Results</h1>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Resume</th>
+        <th>Send Mail</th>
+      </tr>
+      {% for c in candidates %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.email }}</td>
+        <td><a href="{{ c.file }}" target="_blank">View Resume</a></td>
+        <td>
+          <form onsubmit="sendMail(event)" class="mail-form">
+            <input type="hidden" name="candidate_email" value="{{ c.email }}">
+            <input type="hidden" name="resume_file" value="{{ c.file }}">
+            <input type="hidden" name="company_name" value="{{ company_name }}">
+            <input type="email" name="hr_email" placeholder="Your Gmail" required>
+            <input type="password" name="hr_password" placeholder="Gmail App Password" required>
+            <button type="submit">Send</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div class="email-box">
+      <h3>📧 Generated Email:</h3>
+      <pre>{{ email }}</pre>
+    </div>
+    <div class="spinner" id="mailSpinner"></div>
+  </div>
+
+  <footer>
+    © 2025 HireGenix | <a href="#">Privacy Policy</a>
+  </footer>
+
+<script>
+async function sendMail(event) {
+  event.preventDefault();
+  document.getElementById("mailSpinner").style.display = "block";
+  const formData = new FormData(event.target);
+  const response = await fetch("/send-mail", { method: "POST", body: formData });
+  const data = await response.json();
+  alert(data.message);
+  document.getElementById("mailSpinner").style.display = "none";
+}
+</script>
+</body>
+</html>

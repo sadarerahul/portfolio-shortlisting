@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+
+chromadb
+langchain
+langchain-groq
+
+pdfplumber
+docx2txt
+
+python-dotenv

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload - AI Resume Shortlisting</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div class="navbar">
+    <a class="navbar-brand" href="/">HireGenix</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/main">Shortlist</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>📂 Upload Job Post & Resumes</h1>
+    <form action="/shortlist" method="post" enctype="multipart/form-data">
+      <label>Company Name:</label>
+      <input type="text" name="company_name" required>
+
+      <label>Upload Job Description:</label>
+      <input type="file" name="job_post" required>
+
+      <label>Upload Resumes:</label>
+      <input type="file" name="resumes" multiple required>
+
+      <label>Select Number of Best Matches:</label>
+      <input type="number" name="top_k" value="3" min="1" max="10">
+
+      <button type="submit">Shortlist Resume</button>
+    </form>
+    <div class="spinner" id="loadingSpinner"></div>
+  </div>
+
+  <footer>
+    © 2025 HireGenix | <a href="#">Privacy Policy</a>
+  </footer>
+
+<script>
+document.querySelector("form").addEventListener("submit", () => {
+  document.getElementById("loadingSpinner").style.display = "block";
+});
+</script>
+</body>
+</html>
